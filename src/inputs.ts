@@ -1,6 +1,6 @@
 import { Glob } from "bun";
 import { stat, readdir } from "node:fs/promises";
-import { join, extname } from "node:path";
+import { join, extname, resolve } from "node:path";
 
 const IMAGE_EXTS = new Set([".jpg", ".jpeg", ".png", ".webp", ".avif", ".gif", ".tiff", ".tif"]);
 
@@ -28,7 +28,11 @@ export async function expandInputs(inputs: string[], recursive: boolean): Promis
   for (const item of inputs) {
     if (isGlob(item)) {
       const glob = new Glob(item);
-      for await (const file of glob.scan({ onlyFiles: true })) out.add(file);
+      const cwd = process.cwd();
+      for await (const file of glob.scan({ onlyFiles: true, cwd })) {
+        const abs = resolve(cwd, file);
+        if (IMAGE_EXTS.has(extname(abs).toLowerCase())) out.add(abs);
+      }
       continue;
     }
     let st;
