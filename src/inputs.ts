@@ -43,10 +43,10 @@ export async function expandInputs(inputs: string[], recursive: boolean): Promis
     }
     if (st.isDirectory()) {
       for (const f of await listDir(item, recursive)) {
-        if (IMAGE_EXTS.has(extname(f).toLowerCase())) out.add(f);
+        if (IMAGE_EXTS.has(extname(f).toLowerCase())) out.add(resolve(f));
       }
     } else {
-      out.add(item);
+      if (IMAGE_EXTS.has(extname(item).toLowerCase())) out.add(resolve(item));
     }
   }
   return [...out].sort();
