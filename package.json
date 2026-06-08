@@ -1,0 +1,19 @@
+{
+  "name": "picture-tiny-cli",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "ptiny": "bin/ptiny"
+  },
+  "module": "src/index.ts",
+  "scripts": {
+    "test": "bun test",
+    "ptiny": "bun bin/ptiny"
+  },
+  "dependencies": {
+    "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.14"
+  }
+}
