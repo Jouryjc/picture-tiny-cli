@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies (official registry, fresh resolve)
+        run: |
+          echo 'registry=https://registry.npmjs.org/' > .npmrc
+          rm -f bun.lock
+          bun install
+
+      - name: Run tests
+        run: bun test
