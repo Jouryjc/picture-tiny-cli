@@ -2,3 +2,11 @@ node_modules/
 dist/
 *.log
 .DS_Store
+
+# local scratch / personal images (keep them out of the public repo)
+ChatGPT Image*
+*.min.png
+*.min.webp
+*.min.jpg
+*.tgz
+.npmrc

@@ -1,6 +1,6 @@
 {
   "name": "picture-tiny-cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Compress images to a target file size and/or pixel dimensions with minimal quality loss — JPEG/PNG/WebP/AVIF, pure-JSON output for agents. Requires the bun runtime.",
   "type": "module",
   "bin": {
@@ -29,6 +29,14 @@
   ],
   "license": "MIT",
   "author": "jouryjc",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jouryjc/picture-tiny-cli.git"
+  },
+  "homepage": "https://github.com/Jouryjc/picture-tiny-cli#readme",
+  "bugs": {
+    "url": "https://github.com/Jouryjc/picture-tiny-cli/issues"
+  },
   "scripts": {
     "test": "bun test",
     "ptiny": "bun bin/ptiny"
