@@ -1,11 +1,34 @@
 {
   "name": "picture-tiny-cli",
   "version": "0.1.0",
+  "description": "Compress images to a target file size and/or pixel dimensions with minimal quality loss — JPEG/PNG/WebP/AVIF, pure-JSON output for agents. Requires the bun runtime.",
   "type": "module",
   "bin": {
     "ptiny": "bin/ptiny"
   },
   "module": "src/index.ts",
+  "files": [
+    "bin",
+    "src",
+    "README.md"
+  ],
+  "keywords": [
+    "image",
+    "compression",
+    "compress",
+    "optimize",
+    "resize",
+    "sharp",
+    "webp",
+    "avif",
+    "jpeg",
+    "png",
+    "cli",
+    "bun",
+    "agent"
+  ],
+  "license": "MIT",
+  "author": "jouryjc",
   "scripts": {
     "test": "bun test",
     "ptiny": "bun bin/ptiny"
