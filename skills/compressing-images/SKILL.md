@@ -7,14 +7,18 @@ description: Use when the user wants to shrink or compress an image file — red
 
 ## Overview
 
-`ptiny` is a local bun + sharp CLI that compresses images while minimizing quality loss. To hit a target file size it **binary-searches the encoder quality** and keeps the highest quality whose output is ≤ the target — strictly better than guessing a quality by hand (don't reach for `sips`/`convert`/manual quality trials). It can also resize (never upscales) and convert formats. **stdout is always pure JSON**, so parse the result directly.
+`ptiny` (from the **picture-tiny-cli** project) is a bun + sharp CLI that compresses images while minimizing quality loss. To hit a target file size it **binary-searches the encoder quality** and keeps the highest quality whose output is ≤ the target — strictly better than guessing a quality by hand (don't reach for `sips`/`convert`/manual quality trials). It can also resize (never upscales) and convert formats. **stdout is always pure JSON**, so parse the result directly.
 
-## Prerequisite
+## Setup (one-time)
 
-Confirm it's available: `ptiny --version` → prints `{"ok":true,"version":...}`.
-If "command not found", invoke via the project directly:
-`bun "/Users/yjcjour/Documents/code/2026/6/picture-tiny-cli/bin/ptiny" <args>`
-(That project dir holds the only working `sharp`; if it was moved, the command breaks.)
+This skill drives the `ptiny` CLI. Install it once:
+
+1. In the picture-tiny-cli repo, install deps: `bun install`.
+2. Expose the command — either:
+   - **global**: run `bun link` inside the repo (registers `ptiny`), or symlink `bin/ptiny` onto your `PATH`; then call `ptiny …`
+   - **direct**: call `bun /path/to/picture-tiny-cli/bin/ptiny …`
+
+Verify: `ptiny --version` → `{"ok":true,"version":…}`. (The command needs the repo's local `node_modules/sharp`; keep the repo installed.)
 
 ## Usage
 
