@@ -49,3 +49,23 @@ test("--version prints JSON and exits 0", async () => {
   expect(code).toBe(0);
   expect(json.version).toBeTruthy();
 });
+
+test("partial failure yields exit code 1 with errors[]", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "ptiny-cli-"));
+  const good = join(dir, "good.jpg");
+  const buf = await sharp(noiseRaw(200, 200, 3), { raw: { width: 200, height: 200, channels: 3 } })
+    .jpeg({ quality: 100 })
+    .toBuffer();
+  await writeFile(good, buf);
+  // .png extension passes the input filter but the bytes are not a real image,
+  // so it expands successfully yet fails during compression.
+  const corrupt = join(dir, "corrupt.png");
+  await writeFile(corrupt, "this is not a real png");
+
+  const { code, json } = await runCli([good, corrupt, "--quality", "60", "--out-dir", dir]);
+  expect(code).toBe(1);
+  expect(json.ok).toBe(false);
+  expect(json.summary.ok).toBe(1);
+  expect(json.summary.failed).toBe(1);
+  expect(json.errors.length).toBe(1);
+});

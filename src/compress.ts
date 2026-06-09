@@ -138,6 +138,15 @@ export async function compressImage(
   if (opts.quality != null) {
     chosenQuality = clampQuality(opts.quality);
     resultBuffer = await encode(chosenQuality);
+    if (targetBytes != null) {
+      reachedTarget = resultBuffer.length <= targetBytes;
+      if (!reachedTarget) {
+        warnings.push(
+          `fixed --quality ${chosenQuality} produced ${resultBuffer.length} bytes, ` +
+            `exceeding target ${targetBytes}; omit --quality to let size search pick a smaller quality`,
+        );
+      }
+    }
   } else if (targetBytes != null) {
     const search = await searchQuality(
       (q) => encode(q),

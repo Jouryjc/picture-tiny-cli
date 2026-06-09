@@ -77,3 +77,22 @@ test("best effort when target is unreachable", async () => {
   expect(res.reachedTarget).toBe(false);
   expect(res.warnings.length).toBeGreaterThan(0);
 });
+
+test("fixed quality reconciles reachedTarget against max-size", async () => {
+  const img = await noiseJpeg(400, 400);
+  const tight = await compressImage(img, { quality: 95, maxSize: 2 * 1024 });
+  expect(tight.quality).toBe(95);
+  expect(tight.reachedTarget).toBe(false);
+  expect(tight.warnings.some((w) => /quality/i.test(w))).toBe(true);
+  const loose = await compressImage(img, { quality: 30, maxSize: 5 * 1024 * 1024 });
+  expect(loose.reachedTarget).toBe(true);
+});
+
+test("size-only path encodes with default quality and no warnings", async () => {
+  const img = await noiseJpeg(1000, 1000);
+  const res = await compressImage(img, { maxSide: 500 });
+  expect(res.width).toBe(500);
+  expect(res.quality).toBe(82);
+  expect(res.reachedTarget).toBe(true);
+  expect(res.warnings.length).toBe(0);
+});

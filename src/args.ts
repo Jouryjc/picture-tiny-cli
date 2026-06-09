@@ -27,12 +27,14 @@ export interface Options {
 
 function parseIntStrict(raw: string, name: string): number {
   if (!/^\d+$/.test(raw.trim())) throw new UsageError(`--${name} must be a positive integer`);
-  return parseInt(raw, 10);
+  const n = parseInt(raw, 10);
+  if (n < 1) throw new UsageError(`--${name} must be a positive integer`);
+  return n;
 }
 
-function parseQuality(raw: string): number {
-  const q = parseIntStrict(raw, "quality");
-  if (q < 1 || q > 100) throw new UsageError("--quality must be 1-100");
+function parseQuality(raw: string, name: string): number {
+  const q = parseIntStrict(raw, name);
+  if (q > 100) throw new UsageError(`--${name} must be 1-100`);
   return q;
 }
 
@@ -73,7 +75,7 @@ export function parseCliArgs(argv: string[]): Options {
     inPlace: v["in-place"] ?? false,
     recursive: v.recursive ?? false,
     background: v.background ?? "#ffffff",
-    minQuality: v["min-quality"] != null ? parseIntStrict(v["min-quality"], "min-quality") : 1,
+    minQuality: v["min-quality"] != null ? parseQuality(v["min-quality"], "min-quality") : 1,
     dryRun: v["dry-run"] ?? false,
     help: v.help ?? false,
     version: v.version ?? false,
@@ -89,7 +91,7 @@ export function parseCliArgs(argv: string[]): Options {
   if (v.width != null) opts.width = parseIntStrict(v.width, "width");
   if (v.height != null) opts.height = parseIntStrict(v.height, "height");
   if (v["max-side"] != null) opts.maxSide = parseIntStrict(v["max-side"], "max-side");
-  if (v.quality != null) opts.quality = parseQuality(v.quality);
+  if (v.quality != null) opts.quality = parseQuality(v.quality, "quality");
   if (v.format != null) {
     try {
       opts.format = normalizeFormat(v.format);
@@ -122,5 +124,8 @@ function validate(opts: Options): void {
   }
   if (opts.output != null && opts.inputs.length > 1) {
     throw new UsageError("--output cannot be used with multiple inputs; use --out-dir");
+  }
+  if (opts.inPlace && (opts.output != null || opts.outDir != null)) {
+    throw new UsageError("--in-place cannot be combined with --output or --out-dir");
   }
 }

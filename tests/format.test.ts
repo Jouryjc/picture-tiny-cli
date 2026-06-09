@@ -13,6 +13,8 @@ test("normalizeFormat maps aliases and rejects unknown", () => {
 
 test("LOSSY_FORMATS contains lossy targets", () => {
   expect(LOSSY_FORMATS.has("jpeg")).toBe(true);
+  expect(LOSSY_FORMATS.has("webp")).toBe(true);
+  expect(LOSSY_FORMATS.has("avif")).toBe(true);
   expect(LOSSY_FORMATS.has("png")).toBe(false);
 });
 
@@ -21,11 +23,15 @@ test("applyEncoder produces the requested format", async () => {
     sharp({ create: { width: 16, height: 16, channels: 3, background: { r: 1, g: 2, b: 3 } } });
   const jpeg = await applyEncoder(base(), "jpeg", 70).toBuffer();
   const webp = await applyEncoder(base(), "webp", 70).toBuffer();
+  const avif = await applyEncoder(base(), "avif", 70).toBuffer();
   const pngLossless = await applyEncoder(base(), "png", null).toBuffer();
   const pngQuant = await applyEncoder(base(), "png", 50).toBuffer();
   expect((await sharp(jpeg).metadata()).format).toBe("jpeg");
   expect((await sharp(webp).metadata()).format).toBe("webp");
+  // sharp 把 avif 报告为底层容器 "heif"
+  expect(avif.length).toBeGreaterThan(0);
+  expect((await sharp(avif).metadata()).format).toBe("heif");
   expect((await sharp(pngLossless).metadata()).format).toBe("png");
   expect((await sharp(pngQuant).metadata()).format).toBe("png");
-  expect(DEFAULT_QUALITY).toBeGreaterThan(0);
+  expect(DEFAULT_QUALITY).toBe(82);
 });

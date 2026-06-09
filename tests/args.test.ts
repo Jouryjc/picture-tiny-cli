@@ -32,3 +32,28 @@ test("rejects out-of-range quality and bad format", () => {
   expect(() => parseCliArgs(["a.jpg", "--quality", "150"])).toThrow(/quality/);
   expect(() => parseCliArgs(["a.jpg", "--quality", "80", "--format", "bmp"])).toThrow(/format/);
 });
+
+test("rejects zero for integer dimension/concurrency args", () => {
+  expect(() => parseCliArgs(["a.jpg", "--width", "0"])).toThrow(/width/);
+  expect(() => parseCliArgs(["a.jpg", "--max-side", "0"])).toThrow(/max-side/);
+  expect(() => parseCliArgs(["a.jpg", "--quality", "80", "--concurrency", "0"])).toThrow(
+    /concurrency/,
+  );
+});
+
+test("bounds min-quality to 1-100", () => {
+  expect(() =>
+    parseCliArgs(["a.jpg", "--max-size", "100kb", "--min-quality", "200"]),
+  ).toThrow(/min-quality/);
+  const o = parseCliArgs(["a.jpg", "--max-size", "100kb", "--min-quality", "10"]);
+  expect(o.minQuality).toBe(10);
+});
+
+test("rejects --in-place combined with --output or --out-dir", () => {
+  expect(() =>
+    parseCliArgs(["a.jpg", "--quality", "80", "--in-place", "--output", "o.jpg"]),
+  ).toThrow(/in-place/);
+  expect(() =>
+    parseCliArgs(["a.jpg", "--quality", "80", "--in-place", "--out-dir", "out"]),
+  ).toThrow(/in-place/);
+});
