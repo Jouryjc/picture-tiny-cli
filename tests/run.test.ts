@@ -1,6 +1,6 @@
 import { test, expect } from "bun:test";
 import sharp from "sharp";
-import { mkdtemp, writeFile, readFile, stat } from "node:fs/promises";
+import { mkdtemp, writeFile, stat, mkdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { processFile, processAll } from "../src/run";
@@ -41,13 +41,45 @@ function baseOpts(over: Partial<Options>): Options {
 test("processFile writes a compressed file and reports stats", async () => {
   const dir = await mkdtemp(join(tmpdir(), "ptiny-run-"));
   const input = join(dir, "in.jpg");
+  const outDir = join(dir, "out");
   await writeNoiseJpeg(input, 700, 700);
-  const res = await processFile(input, baseOpts({ maxSize: 25 * 1024, outDir: dir }));
+  const res = await processFile(input, baseOpts({ maxSize: 25 * 1024, outDir }));
   expect(res.ok).toBe(true);
-  expect(res.output).toBe(join(dir, "in.jpg"));
+  expect(res.output).toBe(join(outDir, "in.jpg"));
   expect(res.outputBytes!).toBeLessThanOrEqual(25 * 1024);
   expect(res.savedBytes!).toBeGreaterThan(0);
   expect((await stat(res.output!)).size).toBe(res.outputBytes);
+});
+
+test("processFile refuses to overwrite the original without --in-place", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "ptiny-run-"));
+  const input = join(dir, "in.jpg");
+  await writeNoiseJpeg(input, 300, 300);
+  const sizeBefore = (await stat(input)).size;
+  // suffix "" makes the sibling output path equal the input path
+  const res = await processFile(input, baseOpts({ quality: 50, suffix: "" }));
+  expect(res.ok).toBe(false);
+  expect(res.error).toMatch(/overwrite the original/i);
+  expect((await stat(input)).size).toBe(sizeBefore); // original untouched
+});
+
+test("processAll flags output-path collisions instead of silently overwriting", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "ptiny-run-"));
+  const a = join(dir, "a");
+  const b = join(dir, "b");
+  await mkdir(a, { recursive: true });
+  await mkdir(b, { recursive: true });
+  const ai = join(a, "img.jpg");
+  const bi = join(b, "img.jpg");
+  await writeNoiseJpeg(ai, 200, 200);
+  await writeNoiseJpeg(bi, 200, 200);
+  const outDir = join(dir, "out");
+  const results = await processAll([ai, bi], baseOpts({ quality: 60, outDir }));
+  const ok = results.filter((r) => r.ok);
+  const failed = results.filter((r) => !r.ok);
+  expect(ok.length).toBe(1);
+  expect(failed.length).toBe(1);
+  expect(failed[0]!.error).toMatch(/collides/i);
 });
 
 test("processFile dry-run does not write", async () => {
@@ -72,7 +104,7 @@ test("processAll handles multiple files", async () => {
   const b = join(dir, "b.jpg");
   await writeNoiseJpeg(a, 300, 300);
   await writeNoiseJpeg(b, 300, 300);
-  const results = await processAll([a, b], baseOpts({ quality: 60, outDir: dir }));
+  const results = await processAll([a, b], baseOpts({ quality: 60, outDir: join(dir, "out") }));
   expect(results.length).toBe(2);
   expect(results.every((r) => r.ok)).toBe(true);
 });

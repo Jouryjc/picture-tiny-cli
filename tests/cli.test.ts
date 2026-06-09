@@ -29,7 +29,7 @@ test("compresses a real file to target size, stdout is pure JSON", async () => {
     .toBuffer();
   await writeFile(input, buf);
 
-  const { code, json } = await runCli([input, "--max-size", "20kb", "--out-dir", dir]);
+  const { code, json } = await runCli([input, "--max-size", "20kb", "--out-dir", join(dir, "out")]);
   expect(code).toBe(0);
   expect(json.ok).toBe(true);
   expect(json.summary.count).toBe(1);
@@ -62,7 +62,7 @@ test("partial failure yields exit code 1 with errors[]", async () => {
   const corrupt = join(dir, "corrupt.png");
   await writeFile(corrupt, "this is not a real png");
 
-  const { code, json } = await runCli([good, corrupt, "--quality", "60", "--out-dir", dir]);
+  const { code, json } = await runCli([good, corrupt, "--quality", "60", "--out-dir", join(dir, "out")]);
   expect(code).toBe(1);
   expect(json.ok).toBe(false);
   expect(json.summary.ok).toBe(1);

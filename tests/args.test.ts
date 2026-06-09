@@ -57,3 +57,9 @@ test("rejects --in-place combined with --output or --out-dir", () => {
     parseCliArgs(["a.jpg", "--quality", "80", "--in-place", "--out-dir", "out"]),
   ).toThrow(/in-place/);
 });
+
+test("rejects --in-place combined with --format", () => {
+  expect(() =>
+    parseCliArgs(["a.png", "--quality", "80", "--in-place", "--format", "webp"]),
+  ).toThrow(/in-place/);
+});

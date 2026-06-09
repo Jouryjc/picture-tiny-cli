@@ -128,4 +128,9 @@ function validate(opts: Options): void {
   if (opts.inPlace && (opts.output != null || opts.outDir != null)) {
     throw new UsageError("--in-place cannot be combined with --output or --out-dir");
   }
+  if (opts.inPlace && opts.format != null) {
+    throw new UsageError(
+      "--in-place cannot be combined with --format (it would change the extension and orphan the original); use --out-dir or --output",
+    );
+  }
 }
