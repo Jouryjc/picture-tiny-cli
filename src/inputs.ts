@@ -27,7 +27,9 @@ export async function expandInputs(inputs: string[], recursive: boolean): Promis
   const out = new Set<string>();
   for (const item of inputs) {
     if (isGlob(item)) {
-      const glob = new Glob(item);
+      // Windows 路径分隔符 \ 在 glob 语法中是转义符，统一替换为 /
+      const pattern = process.platform === "win32" ? item.replaceAll("\\", "/") : item;
+      const glob = new Glob(pattern);
       const cwd = process.cwd();
       for await (const file of glob.scan({ onlyFiles: true, cwd })) {
         const abs = resolve(cwd, file);

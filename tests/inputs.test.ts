@@ -1,7 +1,7 @@
 import { test, expect } from "bun:test";
 import { mkdtemp, writeFile, mkdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, isAbsolute } from "node:path";
 import { expandInputs } from "../src/inputs";
 import { chdir, cwd as getCwd } from "node:process";
 
@@ -48,7 +48,7 @@ test("glob pattern returns absolute paths and filters non-images", async () => {
     chdir(dir);
     // '*' matches everything in dir — should only return image files, not note.txt
     const files = await expandInputs(["*"], false);
-    expect(files.every((f) => f.startsWith("/"))).toBe(true);
+    expect(files.every((f) => isAbsolute(f))).toBe(true);
     expect(files.some((f) => f.endsWith("a.png"))).toBe(true);
     expect(files.some((f) => f.endsWith("b.jpg"))).toBe(true);
     expect(files.some((f) => f.endsWith("note.txt"))).toBe(false);
@@ -66,7 +66,7 @@ test("glob pattern with absolute prefix returns absolute paths", async () => {
   const files = await expandInputs([pattern], false);
   expect(files.length).toBe(1);
   expect(files[0]).toBe(join(dir, "a.png"));
-  expect(files[0]!.startsWith("/")).toBe(true);
+  expect(isAbsolute(files[0]!)).toBe(true);
 });
 
 test("glob pattern filters out non-image extensions", async () => {

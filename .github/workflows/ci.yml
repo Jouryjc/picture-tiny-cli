@@ -8,7 +8,11 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
 
@@ -18,6 +22,7 @@ jobs:
           bun-version: latest
 
       - name: Install dependencies (official registry, fresh resolve)
+        shell: bash
         run: |
           echo 'registry=https://registry.npmjs.org/' > .npmrc
           rm -f bun.lock
